@@ -6,8 +6,9 @@
 #include "lua-geoip.h"
 #include "database.h"
 
-#define LUAGEOIP_COUNTRY_VERSION     "lua-geoip.country 0.1.1"
-#define LUAGEOIP_COUNTRY_COPYRIGHT   "Copyright (C) 2011, lua-geoip authors"
+#define LUAGEOIP_COUNTRY_VERSION     "lua-geoip.country 0.2"
+#define LUAGEOIP_COUNTRY_COPYRIGHT   \
+        "Copyright (C) 2011-2017, lua-geoip authors"
 #define LUAGEOIP_COUNTRY_DESCRIPTION \
         "Bindings for MaxMind's GeoIP library (country database)"
 
@@ -146,6 +147,21 @@ static int lcountry_query_by_addr(lua_State * L)
     );
 }
 
+static int lcountry_query_by_addr6(lua_State * L)
+{
+  GeoIP * pGeoIP = check_country_db(L, 1);
+  const char * addr = luaL_checkstring(L, 2);
+
+  if (pGeoIP == NULL)
+  {
+    return lua_error(L); /* Error message already on stack */
+  }
+
+  return push_country_info(
+      L, 3, GeoIP_id_by_addr_v6(pGeoIP, addr)
+    );
+}
+
 static int lcountry_query_by_ipnum(lua_State * L)
 {
   GeoIP * pGeoIP = check_country_db(L, 1);
@@ -222,6 +238,7 @@ static const luaL_Reg M[] =
   { "query_by_name", lcountry_query_by_name },
   { "query_by_addr", lcountry_query_by_addr },
   { "query_by_ipnum", lcountry_query_by_ipnum },
+  { "query_by_addr6", lcountry_query_by_addr6 },
 
   { "charset", lcountry_charset },
   { "set_charset", lcountry_set_charset },
